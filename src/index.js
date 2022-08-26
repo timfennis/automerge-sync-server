@@ -1,21 +1,32 @@
-import express from 'express'
-import ServerRepo from './ServerRepo.js'
+import express from "express"
+import { WebSocketServer } from "ws"
+import {
+  ServerRepo,
+  NodeWSServerAdapter,
+  NodeFSStorageAdapter,
+} from "automerge-repo"
 
-const PORT = 3000;
-const serverRepo = new ServerRepo();
-const app = express();
-app.use(express.static('public'));
+const wsServer = new WebSocketServer({ noServer: true })
+const config = {
+  network: [new NodeWSServerAdapter(wsServer)],
+  storage: new NodeFSStorageAdapter(),
+}
 
-app.get('/', (req, res) => {
-  res.send('Hello World')
+const PORT = 3030
+const serverRepo = ServerRepo(config)
+const app = express()
+app.use(express.static("public"))
+
+app.get("/", (req, res) => {
+  res.send("Hello World")
 })
 
 const server = app.listen(PORT, () => {
-  console.log(`Listening on port ${PORT}`);
-});
+  console.log(`Listening on port ${PORT}`)
+})
 
-server.on('upgrade', (request, socket, head) => {
-  serverRepo.server.handleUpgrade(request, socket, head, socket => {
-    serverRepo.server.emit('connection', socket, request);
-  });
-});
+server.on("upgrade", (request, socket, head) => {
+  wsServer.handleUpgrade(request, socket, head, (socket) => {
+    wsServer.emit("connection", socket, request)
+  })
+})
