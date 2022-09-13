@@ -1,10 +1,6 @@
 import express from "express"
 import { WebSocketServer } from "ws"
-import {
-  ServerRepo,
-  NodeWSServerAdapter,
-  NodeFSStorageAdapter,
-} from "automerge-repo"
+import { Repo, NodeWSServerAdapter, NodeFSStorageAdapter } from "automerge-repo"
 
 const wsServer = new WebSocketServer({ noServer: true })
 const config = {
@@ -13,7 +9,7 @@ const config = {
 }
 
 const PORT = 3030
-const serverRepo = ServerRepo(config)
+const serverRepo = Repo(config)
 const app = express()
 app.use(express.static("public"))
 
